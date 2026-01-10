@@ -25,6 +25,10 @@ impl Direction {
             Direction::RIGHT => Point { x: 1, y: 0 },
         }
     }
+
+    pub fn iter() -> impl Iterator<Item = Direction> {
+        DIRECTIONS.iter().map(|dir| dir.clone())
+    }
 }
 
 pub fn add_direction(a: Point, dir: Direction) -> Point {

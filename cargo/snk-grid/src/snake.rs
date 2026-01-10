@@ -19,6 +19,12 @@ pub struct Snake4 {
     body: [Point; 4],
 }
 
+impl Snake4 {
+    pub fn from_points(points: [Point; 4]) -> Self {
+        Snake4 { body: points }
+    }
+}
+
 impl Snake for Snake4 {
     fn get_head(&self) -> Point {
         self.body[0]

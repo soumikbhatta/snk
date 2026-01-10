@@ -14,6 +14,14 @@ impl Default for Color {
         Color::Empty
     }
 }
+impl Color {
+    pub fn is_walkable(&self, walkable: Color) -> bool {
+        *self <= walkable
+    }
+    pub fn is_empty(&self) -> bool {
+        *self == Color::Empty
+    }
+}
 
 pub fn iter_rectangle_fill(width: i8, height: i8) -> impl Iterator<Item = Point> {
     (0..height).flat_map(move |y| (0..width).map(move |x| Point { x, y }))
@@ -72,6 +80,14 @@ impl<T: Copy> Grid<T> {
             cells,
         }
     }
+
+    pub fn iter_fill(&mut self) -> impl Iterator<Item = Point> {
+        iter_rectangle_fill(self.width as i8, self.height as i8)
+    }
+
+    pub fn iter_hull(&mut self) -> impl Iterator<Item = Point> {
+        iter_rectangle_hull(self.width as i8, self.height as i8)
+    }
 }
 impl<T: Default + Copy> Grid<T> {
     pub fn create_with_default(width: u8, height: u8) -> Grid<T> {
@@ -88,7 +104,14 @@ impl<T: Default + Copy> Grid<T> {
 
 impl Grid<Color> {
     pub fn is_walkable(&self, walkable: Color, p: Point) -> bool {
-        !self.is_inside(p) || self.get(p) <= walkable
+        self.get_color(p).is_walkable(walkable)
+    }
+    pub fn get_color(&self, p: Point) -> Color {
+        if !self.is_inside(p) {
+            Color::Empty
+        } else {
+            self.get(p)
+        }
     }
 }
 

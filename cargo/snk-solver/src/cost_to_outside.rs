@@ -2,7 +2,7 @@ use std::{collections::HashSet, usize};
 
 use snk_grid::{
     direction::iter_neighbour,
-    grid::{iter_rectangle_hull, Color, Grid},
+    grid::{Color, Grid, iter_rectangle_hull},
     point::Point,
 };
 

@@ -28,10 +28,20 @@ pub enum SampleGrid {
     OneCave,
     Caves,
     Realistic,
-    Labyrinthe,
+    Labyrinth,
     RandomPack,
     SolidBlock,
 }
+pub const SAMPLEGRIDS: [SampleGrid; 8] = [
+    SampleGrid::Empty,
+    SampleGrid::OneDot,
+    SampleGrid::OneCave,
+    SampleGrid::Caves,
+    SampleGrid::Realistic,
+    SampleGrid::Labyrinth,
+    SampleGrid::RandomPack,
+    SampleGrid::SolidBlock,
+];
 pub fn get_grid_sample(g: SampleGrid) -> Grid<Color> {
     match g {
         SampleGrid::Empty => Grid::<_>::from(
@@ -88,7 +98,7 @@ _  ###      ####          _
 "#,
         ),
 
-        SampleGrid::Labyrinthe => Grid::<_>::from(
+        SampleGrid::Labyrinth => Grid::<_>::from(
             r#"
 ################################################## #
 #                                                  #
