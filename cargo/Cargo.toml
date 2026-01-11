@@ -3,7 +3,7 @@ resolver = "3"
 
 members = [
 "snk-js",
-"snk-grid", "hello-wasm",
+"snk-grid",
 # "snk-solver",
 # "snk-gif-creator"
 ]
