@@ -41,7 +41,7 @@ pub fn log() {
 pub fn get_grid_sample(sample_name: String) -> IColorGrid {
     snk_grid::grid_samples::get_grid_sample(match &sample_name[..] {
         "empty" => SampleGrid::Empty,
-        "labyrinthe" => SampleGrid::Labyrinth,
+        "labyrinth" => SampleGrid::Labyrinth,
         "caves" => SampleGrid::Caves,
         "realistic" => SampleGrid::Realistic,
         "one-dot" => SampleGrid::OneDot,
