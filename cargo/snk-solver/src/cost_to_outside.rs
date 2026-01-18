@@ -1,10 +1,9 @@
-use std::{collections::HashSet, usize};
-
 use snk_grid::{
     direction::iter_neighbour,
     grid::{Color, Grid, iter_rectangle_hull},
     point::Point,
 };
+use std::{collections::HashSet, usize};
 
 pub fn update_cost_to_outside(
     cost_to_outside: &mut Grid<usize>,
@@ -32,6 +31,8 @@ pub fn update_cost_to_outside(
     }
 }
 
+//
+// cost_to_outside : for each cell return the minimal cost ( = sum of dot, with greater color costing more ) to get outside
 pub fn create_cost_to_outside(grid: &Grid<Color>) -> Grid<usize> {
     let mut cost_to_outside = Grid::<usize>::create_with_value(grid.width, grid.height, usize::MAX);
 
@@ -62,9 +63,10 @@ _..._
     assert_eq!(
         cost.to_string(),
         r#"
-_01100_
-_01110_
-_01110_
-"#,
+01100
+01110
+01110
+"#
+        .trim(),
     );
 }

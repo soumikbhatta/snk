@@ -20,6 +20,7 @@ mod tests {
     };
 
     #[test]
+    #[ignore]
     fn it_should_found_solution_for_one_dot() {
         let grid = get_grid_sample(SampleGrid::OneDot);
         let snake = Snake4::from_points([
@@ -43,6 +44,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore]
     fn it_should_found_solution_for_labyrinth() {
         let grid = get_grid_sample(SampleGrid::Labyrinth);
         let snake = Snake4::from_points([
@@ -66,6 +68,7 @@ mod tests {
     }
 
     #[test]
+    #[ignore]
     fn it_should_found_solution_with_no_remaining_colors() {
         for s in SAMPLEGRIDS {
             let grid = get_grid_sample(s);

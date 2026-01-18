@@ -64,7 +64,7 @@ pub fn get_stack_fitness(stack: &Vec<Color>) -> u32 {
     fitness
 }
 
- fn step(
+fn step(
     grid: &mut Grid<Color>,
     snake: &mut Snake4,
     stack: &mut Vec<Color>,
