@@ -28,8 +28,9 @@ console.log(`Listening on ${server.url}`);
 			"../../node_modules/wasm-pack/run.js",
 		);
 		const cwd = path.resolve(__dirname, "../../cargo/snk-js");
+		const gitIgnore = path.resolve(__dirname, "../snk-js/.gitignore");
 		childProcess.execSync(
-			`${wasmPackFile} build --dev --target web --out-dir ../../packages/snk-js`,
+		  `${wasmPackFile} build --dev --target web --out-dir ../../packages/snk-js && rm ${gitIgnore}`,
 			{ cwd },
 		);
 	};

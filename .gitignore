@@ -10,4 +10,5 @@ build
 target
 packages/snk-js/*
 !packages/snk-js/README.md
+!packages/snk-js/package.json
 !packages/snk-js/__tests__
