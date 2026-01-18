@@ -9,12 +9,12 @@ pub trait Snake {
     fn move_snake(&mut self, dir: Direction) -> ();
 }
 
-pub fn snake_will_self_collide(snake: Snake4, dir: Direction) -> bool {
+pub fn snake_will_self_collide(snake: &Snake4, dir: Direction) -> bool {
     let next_head = add_direction(snake.get_head(), dir);
     snake.iter_head_to_tail().any(|p| p == next_head)
 }
 
-#[derive(Clone, PartialEq, Eq)]
+#[derive(Clone, PartialEq, Eq, Hash, Debug)]
 pub struct Snake4 {
     body: [Point; 4],
 }
@@ -22,6 +22,11 @@ pub struct Snake4 {
 impl Snake4 {
     pub fn from_points(points: [Point; 4]) -> Self {
         Snake4 { body: points }
+    }
+    pub fn clone_and_move(&self, dir: Direction) -> Self {
+        let mut s = self.clone();
+        s.move_snake(dir);
+        s
     }
 }
 

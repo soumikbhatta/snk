@@ -1,6 +1,9 @@
 use js_sys;
 use log::info;
-use snk_grid::{color::Color, direction::Direction, grid::Grid, grid_samples::SampleGrid};
+use snk_grid::{
+    color::Color, direction::Direction, grid::Grid, grid_samples::SampleGrid, point::Point,
+    snake::Snake4,
+};
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
@@ -14,6 +17,26 @@ pub fn log() {
     console_log::init_with_level(log::Level::Debug).unwrap();
 
     log::info!("It works!");
+}
+
+#[wasm_bindgen]
+pub fn get_snake_path(grid: IColorGrid, snake: Vec<IPoint>, to: IPoint) -> Option<Vec<IPoint>> {
+    let grid = snk_grid::grid::Grid::from(grid);
+    let res = snk_solver::snake_path::get_snake_path(
+        |p| grid.get_color(p).cost(),
+        Snake4::from_points(
+            snake
+                .into_iter()
+                .map(|p| Point::from(p))
+                .collect::<Vec<_>>()
+                .try_into()
+                .expect("snake should be 4 points"),
+        ),
+        to.into(),
+        99999,
+    );
+
+    res.map(|d| d.into_iter().map(|d| IPoint::from(d.to_point())).collect())
 }
 
 // #[wasm_bindgen]
