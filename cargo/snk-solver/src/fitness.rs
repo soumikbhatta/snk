@@ -1,6 +1,7 @@
 use snk_grid::{
+    color::Color,
     direction::Direction,
-    grid::{Color, Grid, iter_rectangle_fill},
+    grid::{Grid, iter_rectangle_fill},
     snake::{Snake, Snake4},
 };
 

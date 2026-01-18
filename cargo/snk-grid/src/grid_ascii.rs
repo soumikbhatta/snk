@@ -1,5 +1,6 @@
 use crate::{
-    grid::{Color, Grid, iter_rectangle_fill},
+    color::Color,
+    grid::{Grid, iter_rectangle_fill},
     point::Point,
 };
 

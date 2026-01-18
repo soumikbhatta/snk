@@ -1,4 +1,7 @@
-use crate::grid::{Color, Grid, iter_rectangle_fill};
+use crate::{
+    color::Color,
+    grid::{Grid, iter_rectangle_fill},
+};
 
 // Pseudorandom number generator from the "Xorshift RNGs" paper by George Marsaglia.
 // https://github.com/rust-lang/rust/blob/1.55.0/library/core/src/slice/sort.rs#L559-L573

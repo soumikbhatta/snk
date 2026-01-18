@@ -1,27 +1,4 @@
-use crate::point::Point;
-
-#[derive(Copy, Clone, Debug, PartialEq, PartialOrd)]
-#[repr(u8)]
-pub enum Color {
-    Empty = 0,
-    Color1 = 1,
-    Color2 = 2,
-    Color3 = 3,
-    Color4 = 4,
-}
-impl Default for Color {
-    fn default() -> Self {
-        Color::Empty
-    }
-}
-impl Color {
-    pub fn is_walkable(&self, walkable: Color) -> bool {
-        *self <= walkable
-    }
-    pub fn is_empty(&self) -> bool {
-        *self == Color::Empty
-    }
-}
+use crate::{color::Color, point::Point};
 
 pub fn iter_rectangle_fill(width: i8, height: i8) -> impl Iterator<Item = Point> {
     (0..height).flat_map(move |y| (0..width).map(move |x| Point { x, y }))
@@ -115,13 +92,6 @@ impl Grid<Color> {
     }
 }
 
-#[test]
-fn it_should_sort_cell() {
-    assert_eq!(Color::Empty < Color::Color1, true);
-    assert_eq!(Color::Color1 < Color::Color2, true);
-    assert_eq!(Color::Color2 < Color::Color3, true);
-    assert_eq!(Color::Color3 < Color::Color4, true);
-}
 #[test]
 fn it_should_grid_create() {
     let grid = Grid::<Color>::create_with_default(30, 10);

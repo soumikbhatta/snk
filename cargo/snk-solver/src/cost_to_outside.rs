@@ -1,12 +1,13 @@
 use snk_grid::{
+    color::Color,
     direction::iter_neighbour,
-    grid::{Color, Grid, iter_rectangle_hull},
+    grid::{Grid, iter_rectangle_hull},
     point::Point,
 };
-use std::{collections::HashSet, usize};
+use std::collections::HashSet;
 
 pub fn update_cost_to_outside(
-    cost_to_outside: &mut Grid<usize>,
+    cost_to_outside: &mut Grid<u32>,
     grid: &Grid<Color>,
     mut changed: HashSet<Point>,
 ) -> () {
@@ -21,7 +22,8 @@ pub fn update_cost_to_outside(
         // propagate the change to its neightbourn
         for pn in iter_neighbour(p) {
             if cost_to_outside.is_inside(pn) {
-                let new_cost = c + (grid.get(pn) as usize) * 100;
+                let cost = grid.get(pn).cost();
+                let new_cost = c + cost;
                 if new_cost < cost_to_outside.get(pn) {
                     cost_to_outside.set(pn, new_cost);
                     changed.insert(pn);
@@ -33,13 +35,13 @@ pub fn update_cost_to_outside(
 
 //
 // cost_to_outside : for each cell return the minimal cost ( = sum of dot, with greater color costing more ) to get outside
-pub fn create_cost_to_outside(grid: &Grid<Color>) -> Grid<usize> {
-    let mut cost_to_outside = Grid::<usize>::create_with_value(grid.width, grid.height, usize::MAX);
+pub fn create_cost_to_outside(grid: &Grid<Color>) -> Grid<u32> {
+    let mut cost_to_outside = Grid::<u32>::create_with_value(grid.width, grid.height, u32::MAX);
 
     let mut changed = HashSet::<Point>::new();
 
     for p in iter_rectangle_hull(grid.width as i8, grid.height as i8) {
-        let cost = (grid.get(p) as usize) * 100;
+        let cost = grid.get(p).cost();
         cost_to_outside.set(p, cost);
         changed.insert(p);
     }

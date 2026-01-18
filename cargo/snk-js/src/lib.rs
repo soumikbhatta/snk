@@ -1,10 +1,6 @@
 use js_sys;
 use log::info;
-use snk_grid::{
-    direction::Direction,
-    grid::{Color, Grid},
-    grid_samples::SampleGrid,
-};
+use snk_grid::{color::Color, direction::Direction, grid::Grid, grid_samples::SampleGrid};
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
