@@ -24,7 +24,7 @@ jobs:
       - run: cargo fmt --check
         working-directory: cargo
 
-      - run: bun wasm-pack build --dev --target node --out-dir ../../packages/snk-js
+      - run: bun wasm-pack build --dev --target nodejs --out-dir ../../packages/snk-js
         working-directory: cargo/snk-js
 
       - run: npm run type
