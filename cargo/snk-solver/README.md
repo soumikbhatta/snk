@@ -12,6 +12,25 @@ for each cell, true if there is two separated path from the cell to the outside
 
 useful because it means the snake can freely go there
 
+**coil**
+
+given a cave compute the max length of a snake that can loop
+
+assumptions: 
+- can add any cell that is linked to ast least two other coilable cells
+- should be rounded by 2
+
+edge case:
+```
+// tunnel
+######### 
+#     ### 
+# #   ### 
+# #   ### 
+#     ### 
+######### 
+```
+
 ## Steps
 
 For each color

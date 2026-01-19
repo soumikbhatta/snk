@@ -7,11 +7,16 @@ use snk_grid::{
 use std::collections::HashSet;
 
 #[derive(Copy, Clone)]
-pub struct ExitCell {
-    cost: u32,
-    exit_direction: Direction,
+pub struct ExitDirection {
+    pub cost: u32,
+    pub exit_direction: Direction,
 }
-impl ToString for ExitCell {
+impl ExitDirection {
+    pub fn is_outside(&self) -> bool {
+        self.cost == 0
+    }
+}
+impl ToString for ExitDirection {
     fn to_string(&self) -> String {
         if self.cost == 0 {
             "o".to_string()
@@ -23,11 +28,11 @@ impl ToString for ExitCell {
 
 //
 // cost_to_outside : for each cell return the minimal cost ( = sum of dot, with greater color costing more ) to get outside
-pub fn create_path_to_outside(grid: &Grid<Color>) -> Grid<ExitCell> {
-    let mut path_to_outside = Grid::<ExitCell>::create_with_value(
+pub fn create_path_to_outside(grid: &Grid<Color>) -> Grid<ExitDirection> {
+    let mut path_to_outside = Grid::<ExitDirection>::create_with_value(
         grid.width,
         grid.height,
-        ExitCell {
+        ExitDirection {
             cost: u32::MAX,
             exit_direction: Direction::UP,
         },

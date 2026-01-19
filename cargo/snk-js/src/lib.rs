@@ -22,21 +22,33 @@ pub fn log() {
 #[wasm_bindgen]
 pub fn get_snake_path(grid: IColorGrid, snake: Vec<IPoint>, to: IPoint) -> Option<Vec<IPoint>> {
     let grid = snk_grid::grid::Grid::from(grid);
+    let snake = Snake4::from_points(
+        snake
+            .into_iter()
+            .map(|p| Point::from(p))
+            .collect::<Vec<_>>()
+            .try_into()
+            .expect("snake should be 4 points"),
+    );
     let res = snk_solver::snake_path::get_snake_path(
-        |p| grid.get_color(p).cost(),
-        Snake4::from_points(
-            snake
-                .into_iter()
-                .map(|p| Point::from(p))
-                .collect::<Vec<_>>()
-                .try_into()
-                .expect("snake should be 4 points"),
-        ),
+        |p| match grid.get_color(p) {
+            Color::Empty => 1,
+            Color::Color1 => 10,
+            Color::Color2 => 100,
+            Color::Color3 => 200,
+            Color::Color4 => 300,
+        },
+        &snake,
         to.into(),
-        99999,
+        10,
     );
 
-    res.map(|d| d.into_iter().map(|d| IPoint::from(d.to_point())).collect())
+    res.map(|d| {
+        d.into_iter()
+            .map(|dir| dir.to_point())
+            .map(IPoint::from)
+            .collect()
+    })
 }
 
 // #[wasm_bindgen]

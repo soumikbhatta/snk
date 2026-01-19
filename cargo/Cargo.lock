@@ -258,6 +258,7 @@ dependencies = [
 name = "snk-solver"
 version = "1.0.0"
 dependencies = [
+ "log",
  "snk-grid",
 ]
 
