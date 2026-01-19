@@ -2,5 +2,6 @@
 // pub mod reach_outside;
 pub mod cost_to_outside;
 mod fitness;
+mod path_to_outside_grid;
 pub mod snake_path;
 pub mod solver;

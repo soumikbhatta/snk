@@ -23,9 +23,9 @@ impl Color {
         match self {
             Color::Empty => 0,
             Color::Color1 => 1,
-            Color::Color2 => 150,
-            Color::Color3 => 150 * 150,
-            Color::Color4 => 150 * 150 * 150,
+            Color::Color2 => 128,
+            Color::Color3 => 128 * 128,
+            Color::Color4 => 128 * 128 * 128,
         }
     }
 }

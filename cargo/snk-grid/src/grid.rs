@@ -29,6 +29,10 @@ impl<T: Copy> Grid<T> {
         let i = self.get_index(p.x, p.y);
         return self.cells[i];
     }
+    pub fn get_mut(&mut self, p: Point) -> &mut T {
+        let i = self.get_index(p.x, p.y);
+        return self.cells.get_mut(i).unwrap();
+    }
     pub fn set(&mut self, p: Point, value: T) -> () {
         let i = self.get_index(p.x, p.y);
         self.cells[i] = value;
