@@ -6,11 +6,11 @@ use snk_grid::{
 };
 use std::collections::HashSet;
 
-use crate::path_to_outside_grid::ExitDirection;
+use crate::{cost::Cost, path_to_outside_grid::ExitDirection};
 
 pub struct CollectionCost {
-    in_cost: u32,
-    out_cost: u32,
+    in_cost: Cost,
+    out_cost: Cost,
 }
 
 // pub fn get_collect_cost_(is_outside: F, get_cost: C) -> CollectionCost
@@ -32,7 +32,7 @@ pub fn get_collect_cost(
     let mut p = dot;
     loop {
         let e = exit_grid.get(dot);
-        if e.cost == 0 {
+        if e.cost.is_free() {
             break;
         }
         grid.set(p, Color::Empty);
@@ -45,6 +45,6 @@ pub fn get_collect_cost(
 
     CollectionCost {
         in_cost,
-        out_cost: 0,
+        out_cost: Cost::zero(),
     }
 }

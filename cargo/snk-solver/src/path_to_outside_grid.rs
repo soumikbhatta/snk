@@ -2,27 +2,21 @@ use snk_grid::{
     color::Color,
     direction::{Direction, add_direction, iter_directions},
     grid::{Grid, iter_rectangle_hull},
+    grid_ascii::grid_to_ascii_transformed,
     point::Point,
 };
 use std::collections::HashSet;
 
+use crate::cost::Cost;
+
 #[derive(Copy, Clone)]
 pub struct ExitDirection {
-    pub cost: u32,
+    pub cost: Cost,
     pub exit_direction: Direction,
 }
 impl ExitDirection {
     pub fn is_outside(&self) -> bool {
-        self.cost == 0
-    }
-}
-impl ToString for ExitDirection {
-    fn to_string(&self) -> String {
-        if self.cost == 0 {
-            "o".to_string()
-        } else {
-            self.exit_direction.to_string()
-        }
+        self.cost.is_free()
     }
 }
 
@@ -33,7 +27,7 @@ pub fn create_path_to_outside(grid: &Grid<Color>) -> Grid<ExitDirection> {
         grid.width,
         grid.height,
         ExitDirection {
-            cost: u32::MAX,
+            cost: Cost::max(),
             exit_direction: Direction::UP,
         },
     );
@@ -53,16 +47,16 @@ pub fn create_path_to_outside(grid: &Grid<Color>) -> Grid<ExitDirection> {
     } {
         changed.remove(&p);
 
-        let cost = if path_to_outside.is_inside(p) {
+        let cost: Cost = if path_to_outside.is_inside(p) {
             path_to_outside.get(p).cost
         } else {
-            0
+            Cost::zero()
         };
 
         for dir in iter_directions() {
             let p = add_direction(p, dir);
             if path_to_outside.is_inside(p) {
-                let new_cost = cost + grid.get(p).cost();
+                let new_cost = cost + grid.get(p).into();
 
                 let c = path_to_outside.get_mut(p);
 
@@ -79,25 +73,30 @@ pub fn create_path_to_outside(grid: &Grid<Color>) -> Grid<ExitDirection> {
 }
 
 #[test]
-#[ignore]
 fn it_should_compute_the_cost_to_outside() {
     let grid = Grid::<_>::from(
         r#"
 _...._
-_. .._
-_...._
-_...._
+_.  ._
+_.. ._
+_.   _
 "#,
     );
     let pto = create_path_to_outside(&grid);
 
     assert_eq!(
-        pto.to_string(),
+        grid_to_ascii_transformed(&pto, |c| {
+            if c.cost.is_free() {
+                c.cost.0.to_string()
+            } else {
+                "#".to_string()
+            }
+        }),
         r#"
-o↑↑↑→o
-o←←→→o
-o←↑↓→o
-o←↓↓→o
+1####1
+1#43#1
+1##2#1
+1#1111
 "#
         .trim(),
     );

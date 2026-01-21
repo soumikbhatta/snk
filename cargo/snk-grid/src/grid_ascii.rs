@@ -24,7 +24,10 @@ pub fn grid_from_ascii<T: Copy + Default + From<char>>(ascii: &str) -> Grid<T> {
     grid
 }
 
-pub fn grid_to_ascii<T: Copy + ToString>(grid: &Grid<T>) -> String {
+pub fn grid_to_ascii_transformed<T: Copy, F>(grid: &Grid<T>, to_string: F) -> String
+where
+    F: Fn(T) -> String,
+{
     let mut out: String = String::new();
     for y in 0..grid.height {
         for x in 0..grid.width {
@@ -32,7 +35,7 @@ pub fn grid_to_ascii<T: Copy + ToString>(grid: &Grid<T>) -> String {
                 x: x as i8,
                 y: y as i8,
             });
-            out.push(value.to_string().chars().nth(0).unwrap());
+            out.push(to_string(value).chars().nth(0).unwrap());
         }
         if match out.chars().last() {
             Some(c) => c == ' ',
@@ -46,6 +49,10 @@ pub fn grid_to_ascii<T: Copy + ToString>(grid: &Grid<T>) -> String {
 
     out.pop();
     out
+}
+
+pub fn grid_to_ascii<T: Copy + ToString>(grid: &Grid<T>) -> String {
+    grid_to_ascii_transformed(grid, |value| value.to_string())
 }
 
 impl<T: ToString + Copy> ToString for Grid<T> {
