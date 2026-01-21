@@ -3,6 +3,7 @@ use snk_grid::{
     direction::{Direction, add_direction, iter_directions},
     grid::{Grid, iter_rectangle_hull},
     grid_ascii::grid_to_ascii_transformed,
+    grid_samples::{SampleGrid, get_grid_sample},
     point::Point,
 };
 use std::collections::HashSet;

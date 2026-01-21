@@ -18,6 +18,17 @@ pub const DIRECTIONS: [Direction; 4] = [
     Direction::RIGHT,
 ];
 
+impl Into<Point> for Direction {
+    fn into(self) -> Point {
+        match self {
+            Direction::UP => Point { x: 0, y: -1 },
+            Direction::DOWN => Point { x: 0, y: 1 },
+            Direction::LEFT => Point { x: -1, y: 0 },
+            Direction::RIGHT => Point { x: 1, y: 0 },
+        }
+    }
+}
+
 impl Direction {
     pub fn to_point(&self) -> Point {
         match self {

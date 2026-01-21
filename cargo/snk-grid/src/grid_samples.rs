@@ -29,16 +29,18 @@ pub enum SampleGrid {
     Empty,
     OneDot,
     OneCave,
+    OneSmallCave,
     Caves,
     Realistic,
     Labyrinth,
     RandomPack,
     SolidBlock,
 }
-pub const SAMPLEGRIDS: [SampleGrid; 8] = [
+pub const SAMPLEGRIDS: [SampleGrid; 9] = [
     SampleGrid::Empty,
     SampleGrid::OneDot,
     SampleGrid::OneCave,
+    SampleGrid::OneSmallCave,
     SampleGrid::Caves,
     SampleGrid::Realistic,
     SampleGrid::Labyrinth,
@@ -72,6 +74,17 @@ _  ...  _
   .  .. _
  .    . _
   ....  _
+
+"#,
+        ),
+
+        SampleGrid::OneSmallCave => Grid::<_>::from(
+            r#"
+_        _
+_  ###   _
+_  #.#   _
+_  ###   _
+_        _
 
 "#,
         ),

@@ -5,4 +5,5 @@ mod cost;
 mod fitness;
 mod path_to_outside_grid;
 pub mod snake_path;
+mod snake_path_to_outside;
 pub mod solver;
