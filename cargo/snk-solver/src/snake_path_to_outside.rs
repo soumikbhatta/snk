@@ -101,7 +101,7 @@ _########  _
 
 "#,
         );
-        let pto = ExitGrid::create_from_grid_color(&grid);
+        let exit_grid = ExitGrid::create_from_grid_color(&grid);
         let snake = Snake4::from_points([
             Point { x: 2, y: 2 },
             Point { x: 3, y: 2 },
@@ -110,12 +110,50 @@ _########  _
         ]);
 
         let (path, cost) =
-            get_snake_path_to_outside(|p| pto.is_outside(p), |p| grid.get_color(p).into(), &snake);
+            get_snake_path_to_outside(|p| exit_grid.is_outside(p), |p| grid.get_color(p).into(), &snake);
+
+        println!("{:?} {:?}", path, cost);
+
+        assert_eq!(
+            cost.get_color_count(Color::Color4),
+            1,
+            "should have taken the smallest path"
+        );
+    }
+
+    #[test]
+    fn it_should_get_snake_path_to_outside_2() {
+        let mut grid = Grid::<_>::from(
+            r#"
+_          _
+_  #####   _
+_  #   #   _
+_  #   #   _
+_  #####   _
+_          _
+
+"#,
+        );
+
+        assert_eq!(grid.get_color(Point { x: 5, y: 4 }),Color::Color4);
+
+        let exit_grid = ExitGrid::create_from_grid_color(&grid);
+        let snake = Snake4::from_points([
+            Point { x: 5, y: 4 },
+            Point { x: 5, y: 5 },
+            Point { x: 5, y: 6 },
+            Point { x: 5, y: 7 },
+        ]);
+
+        grid.set(Point { x: 5, y: 4 }, Color::Empty);
+
+        let (path, cost) =
+            get_snake_path_to_outside(|p| exit_grid.is_outside(p), |p| grid.get_color(p).into(), &snake);
 
         println!("{:?} {:?}", path, cost);
         assert_eq!(
             cost.get_color_count(Color::Color4),
-            1,
+            0,
             "should have taken the smallest path"
         );
     }

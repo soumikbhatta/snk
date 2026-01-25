@@ -1,5 +1,10 @@
 use js_sys;
-use snk_grid::{color::Color, grid_samples::SampleGrid, point::Point, snake::Snake4};
+use snk_grid::{
+    color::Color,
+    grid_samples::SampleGrid,
+    point::Point,
+    snake::{Snake, Snake4},
+};
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
@@ -51,10 +56,37 @@ pub fn get_best_tunnel_to_collect_point(grid: &IColorGrid, to: &IPoint) -> Vec<I
     let res =
         snk_solver::collect_cost::get_best_tunnel_to_collect_point(&grid, &exit_grid, to.into());
 
-    log::info!("{:?} {:?} {:?}",res.path,res.in_cost,res.out_cost);
-
+    log::info!("{:?} {:?} {:?}", res.path, res.in_cost, res.out_cost);
 
     res.path.into_iter().map(IPoint::from).collect()
+}
+#[wasm_bindgen]
+pub fn get_snake_path_to_outside(grid: &IColorGrid, snake: Vec<IPoint>) -> Vec<IPoint> {
+    let grid = snk_grid::grid::Grid::from(grid);
+    let exit_grid = snk_solver::exit_grid::ExitGrid::create_from_grid_color(&grid);
+    let snake = Snake4::from_points(
+        snake
+            .into_iter()
+            .map(|p| Point::from(p))
+            .collect::<Vec<_>>()
+            .try_into()
+            .expect("snake should be 4 points"),
+    );
+    let res = snk_solver::snake_path_to_outside::get_snake_path_to_outside(
+        |p| exit_grid.is_outside(p),
+        |p| grid.get_color(p).into(),
+        &snake,
+    );
+
+    let mut p = snake.get_head();
+    res.0
+        .into_iter()
+        .map(|dir| {
+            p = p + dir.to_point();
+            p
+        })
+        .map(IPoint::from)
+        .collect()
 }
 
 // #[wasm_bindgen]
@@ -122,6 +154,10 @@ impl IColorGrid {
     pub fn cells(&self) -> js_sys::Uint8Array {
         let o: Vec<u8> = self.cells.iter().map(|u| *u as u8).collect();
         js_sys::Uint8Array::from(&o[..])
+    }
+
+    pub fn set(&mut self, x: i8, y: i8, color: u8) {
+        self.cells[(x as usize) * (self.height as usize) + (y as usize)] = color.into();
     }
 }
 

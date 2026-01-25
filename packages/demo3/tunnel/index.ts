@@ -13,12 +13,15 @@ init_panic_hook();
 init_log();
 
 const grid = get_grid_sample("caves");
-const g = { width: grid.width, height: grid.height, data: grid.cells };
 const { canvas, draw, getPointedCell, highlightCell } = createCanvas(grid);
 document.body.appendChild(canvas);
 
 const drawBestTunnel = ({ x, y }: { x: number; y: number }) => {
-	draw(g, [] as any, []);
+	draw(
+		{ width: grid.width, height: grid.height, data: grid.cells },
+		[] as any,
+		[],
+	);
 
 	const path = get_best_tunnel_to_collect_point(grid, IPoint.create(x, y));
 

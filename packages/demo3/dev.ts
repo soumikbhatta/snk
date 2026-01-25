@@ -2,13 +2,14 @@ import { serve } from "bun";
 import * as childProcess from "child_process";
 import * as fs from "fs";
 import * as path from "path";
-
+import snake_exit_page from "./snake_exit/index.html";
 import tunnel_page from "./tunnel/index.html";
 
 const server = serve({
 	routes: {
 		"/": tunnel_page,
 		"/tunnel": tunnel_page,
+		"/snake_exit": snake_exit_page,
 	},
 
 	// Enable development mode for:

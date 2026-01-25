@@ -95,9 +95,9 @@ _        _
     );
     assert_eq!(grid.get_color(Point { x: 4, y: 2 }), Color::Color1);
 
-    let pto = ExitGrid::create_from_grid_color(&grid);
+    let exit_grid = ExitGrid::create_from_grid_color(&grid);
 
-    let tunnel = get_best_tunnel_to_collect_point(&grid, &pto, Point { x: 4, y: 2 });
+    let tunnel = get_best_tunnel_to_collect_point(&grid, &exit_grid, Point { x: 4, y: 2 });
 
     assert_eq!(tunnel.in_cost.get_color_count(Color::Color4), 1);
     assert_eq!(tunnel.out_cost.get_color_count(Color::Color4), 1);
@@ -123,9 +123,35 @@ _        _
 
     assert_eq!(grid.get_color(Point { x: 5, y: 3 }), Color::Color1);
 
+    let exit_grid = ExitGrid::create_from_grid_color(&grid);
+
+    let tunnel = get_best_tunnel_to_collect_point(&grid, &exit_grid, Point { x: 5, y: 3 });
+    assert_eq!(tunnel.in_cost.get_color_count(Color::Color4), 1);
+    assert_eq!(tunnel.out_cost.get_color_count(Color::Color4), 0);
+
+    assert_eq!(tunnel.in_cost.get_color_count(Color::Color1), 1);
+    assert_eq!(tunnel.out_cost.get_color_count(Color::Color1), 0);
+}
+
+#[test]
+fn it_should_compute_the_tunnel_for_enclaved_dot_in_large_cave_2() {
+    let grid = Grid::<_>::from(
+        r#"
+_           _
+_  ######   _
+_  ##   #   _
+_  ## . #   _
+_  ######   _
+_           _
+
+"#,
+    );
+
+    assert_eq!(grid.get_color(Point { x: 6, y: 3 }), Color::Color1);
+
     let pto = ExitGrid::create_from_grid_color(&grid);
 
-    let tunnel = get_best_tunnel_to_collect_point(&grid, &pto, Point { x: 5, y: 3 });
+    let tunnel = get_best_tunnel_to_collect_point(&grid, &pto, Point { x: 6, y: 3 });
     assert_eq!(tunnel.in_cost.get_color_count(Color::Color4), 1);
     assert_eq!(tunnel.out_cost.get_color_count(Color::Color4), 0);
 
