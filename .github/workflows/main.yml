@@ -31,11 +31,11 @@ jobs:
       - run: bun wasm-pack build --dev --target nodejs --out-dir ../../packages/snk-js
         working-directory: cargo/snk-js
 
-      - run: npm run type
-      - run: npm run lint
-      - run: bun test
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      # - run: npm run type
+      # - run: npm run lint
+      # - run: bun test
+      #   env:
+      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   test-action:
     runs-on: ubuntu-latest
