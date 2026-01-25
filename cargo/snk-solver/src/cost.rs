@@ -44,8 +44,22 @@ impl Cost {
     pub fn max() -> Self {
         Self(u64::MAX)
     }
+    pub fn very_large() -> Self {
+        Self(u64::MAX / 8)
+    }
     pub fn is_free(&self) -> bool {
         self.0 < 256
+    }
+
+    // return the count for the given color
+    pub fn get_color_count(&self, color: Color) -> u64 {
+        match color {
+            Color::Empty => self.0 % 256,
+            Color::Color1 => (self.0 / 256) % 200,
+            Color::Color2 => (self.0 / (256 * 200)) % 200,
+            Color::Color3 => (self.0 / (256 * 200 * 200)) % 200,
+            Color::Color4 => (self.0 / (256 * 200 * 200 * 200)) % 200,
+        }
     }
 }
 
@@ -61,4 +75,16 @@ fn it_should_sum_cost() {
     let mut c = Cost::zero();
     c = c + Color::Color1.into();
     assert!(Cost::zero() < c);
+}
+#[test]
+fn it_should_extract_color_count() {
+    let c = Cost::zero()
+        + Cost::from(Color::Color2) * 6
+        + Cost::from(Color::Color1) * 2
+        + Cost::from(Color::Color1) * 17
+        + Cost::from(Color::Color4) * 25;
+    assert_eq!(c.get_color_count(Color::Color1), 19);
+    assert_eq!(c.get_color_count(Color::Color2), 6);
+    assert_eq!(c.get_color_count(Color::Color3), 0);
+    assert_eq!(c.get_color_count(Color::Color4), 25);
 }

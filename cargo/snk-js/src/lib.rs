@@ -1,9 +1,5 @@
 use js_sys;
-use log::info;
-use snk_grid::{
-    color::Color, direction::Direction, grid::Grid, grid_samples::SampleGrid, point::Point,
-    snake::Snake4,
-};
+use snk_grid::{color::Color, grid_samples::SampleGrid, point::Point, snake::Snake4};
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
@@ -12,10 +8,8 @@ pub fn init_panic_hook() {
 }
 
 #[wasm_bindgen]
-pub fn log() {
-    init_panic_hook();
+pub fn init_log() {
     console_log::init_with_level(log::Level::Debug).unwrap();
-
     log::info!("It works!");
 }
 
@@ -49,6 +43,18 @@ pub fn get_snake_path(grid: IColorGrid, snake: Vec<IPoint>, to: IPoint) -> Optio
             .map(IPoint::from)
             .collect()
     })
+}
+#[wasm_bindgen]
+pub fn get_best_tunnel_to_collect_point(grid: &IColorGrid, to: &IPoint) -> Vec<IPoint> {
+    let grid = snk_grid::grid::Grid::from(grid);
+    let exit_grid = snk_solver::exit_grid::ExitGrid::create_from_grid_color(&grid);
+    let res =
+        snk_solver::collect_cost::get_best_tunnel_to_collect_point(&grid, &exit_grid, to.into());
+
+    log::info!("{:?} {:?} {:?}",res.path,res.in_cost,res.out_cost);
+
+
+    res.path.into_iter().map(IPoint::from).collect()
 }
 
 // #[wasm_bindgen]
@@ -85,14 +91,14 @@ pub fn get_grid_sample(sample_name: String) -> IColorGrid {
 #[wasm_bindgen]
 #[derive(Clone)]
 pub struct IColorGrid {
-    pub width: u8,
-    pub height: u8,
+    pub width: i8,
+    pub height: i8,
     cells: Vec<Color>,
 }
 
 #[wasm_bindgen]
 impl IColorGrid {
-    pub fn create(width: u8, height: u8, data: js_sys::Uint8Array) -> IColorGrid {
+    pub fn create(width: i8, height: i8, data: js_sys::Uint8Array) -> IColorGrid {
         if (width as usize) * (height as usize) != (data.length() as usize) {
             panic!(
                 "grid {}x{} should have {} elements, found {}",
@@ -125,6 +131,15 @@ impl From<IColorGrid> for snk_grid::grid::Grid<Color> {
             width: value.width,
             height: value.height,
             cells: value.cells,
+        }
+    }
+}
+impl From<&IColorGrid> for snk_grid::grid::Grid<Color> {
+    fn from(value: &IColorGrid) -> Self {
+        Self {
+            width: value.width,
+            height: value.height,
+            cells: value.cells.clone(),
         }
     }
 }

@@ -3,11 +3,12 @@ import * as childProcess from "child_process";
 import * as fs from "fs";
 import * as path from "path";
 
-import homepage from "./rr/index.html";
+import tunnel_page from "./tunnel/index.html";
 
 const server = serve({
 	routes: {
-		"/": homepage,
+		"/": tunnel_page,
+		"/tunnel": tunnel_page,
 	},
 
 	// Enable development mode for:
@@ -30,7 +31,7 @@ console.log(`Listening on ${server.url}`);
 		const cwd = path.resolve(__dirname, "../../cargo/snk-js");
 		const gitIgnore = path.resolve(__dirname, "../snk-js/.gitignore");
 		childProcess.execSync(
-		  `${wasmPackFile} build --dev --target web --out-dir ../../packages/snk-js && rm ${gitIgnore}`,
+			`${wasmPackFile} build --dev --target web --out-dir ../../packages/snk-js && rm ${gitIgnore}`,
 			{ cwd },
 		);
 	};

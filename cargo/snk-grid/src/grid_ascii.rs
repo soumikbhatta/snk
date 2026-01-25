@@ -10,7 +10,7 @@ pub fn grid_from_ascii<T: Copy + Default + From<char>>(ascii: &str) -> Grid<T> {
     let width = rows.iter().fold(0, |max_len, r| max_len.max(r.len()));
     let height = rows.len();
 
-    let mut grid = Grid::<T>::create_with_default(width as u8, height as u8);
+    let mut grid = Grid::<T>::create_with_default(width as i8, height as i8);
 
     for p in iter_rectangle_fill(width as i8, height as i8) {
         let mut c = rows[p.y as usize].chars().nth(p.x as usize).unwrap_or(' ');
@@ -43,6 +43,25 @@ where
         } {
             out.pop();
             out.push('_');
+        }
+        out.push('\n');
+    }
+
+    out.pop();
+    out
+}
+
+pub fn get_ascii_grid<F>(grid_width: i8, grid_height: i8, to_string: F) -> String
+where
+    F: Fn(Point) -> String,
+{
+    let mut out: String = String::new();
+    for y in 0..grid_height {
+        for x in 0..grid_width {
+            let p = Point { x, y };
+            let s = to_string(p);
+            let fist_char = s.chars().nth(0).unwrap();
+            out.push(fist_char);
         }
         out.push('\n');
     }

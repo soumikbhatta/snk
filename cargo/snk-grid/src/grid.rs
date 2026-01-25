@@ -13,8 +13,8 @@ pub fn iter_rectangle_hull(width: i8, height: i8) -> impl Iterator<Item = Point>
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Grid<T: Copy> {
-    pub width: u8,
-    pub height: u8,
+    pub width: i8,
+    pub height: i8,
     pub cells: Vec<T>,
 }
 impl<T: Copy> Grid<T> {
@@ -45,13 +45,13 @@ impl<T: Copy> Grid<T> {
     }
 
     /// ⚠️ assuming the point is inside the grid
-    pub fn distance_from_outside(&self, p: Point) -> u8 {
-        let x = p.x as u8;
-        let y = p.y as u8;
-        y.min(self.height - 1 - y).min(x).min(self.width - 1 - x)
+    pub fn distance_from_outside(&self, p: Point) -> i8 {
+        p.y.min(self.height - 1 - p.y)
+            .min(p.x)
+            .min(self.width - 1 - p.x)
     }
 
-    pub fn create_with_value(width: u8, height: u8, value: T) -> Grid<T> {
+    pub fn create_with_value(width: i8, height: i8, value: T) -> Grid<T> {
         let n = (width as usize) * (height as usize);
         let cells = (0..n).map(|_| value).collect();
 
@@ -71,7 +71,7 @@ impl<T: Copy> Grid<T> {
     }
 }
 impl<T: Default + Copy> Grid<T> {
-    pub fn create_with_default(width: u8, height: u8) -> Grid<T> {
+    pub fn create_with_default(width: i8, height: i8) -> Grid<T> {
         let n = (width as usize) * (height as usize);
         let cells = (0..n).map(|_| T::default()).collect();
 

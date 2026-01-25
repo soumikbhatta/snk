@@ -1,17 +1,11 @@
 use snk_grid::{
-    color::Color,
-    direction::{Direction, add_direction, iter_directions, iter_neighbour},
-    grid::{Grid, iter_rectangle_hull},
-    grid_samples::{SampleGrid, get_grid_sample},
+    direction::{Direction, iter_directions},
     point::Point,
     snake::{Snake, Snake4, snake_will_self_collide},
 };
 use std::collections::{BinaryHeap, HashSet};
 
-use crate::{
-    cost::Cost,
-    path_to_outside_grid::{ExitDirection, create_path_to_outside},
-};
+use crate::cost::Cost;
 
 #[derive(Clone, Debug)]
 struct Node {
@@ -68,8 +62,8 @@ where
             let snake = node.snake.clone_and_move(dir);
 
             if close_list.contains(&snake) {
-                // need to update open_list
-                println!("need to update open_list");
+                // usually we want to update the open list here
+                // but since we traverse breadth first, we are sure that previous candidate are better
                 continue;
             }
 
@@ -88,33 +82,41 @@ where
     assert!(false, "should have terminated");
     (vec![], Cost::zero())
 }
+#[cfg(test)]
+mod tests {
+    use super::*;
 
-#[test]
-fn it_should_get_snake_path_to_outside() {
-    let grid = Grid::<_>::from(
-        r#"
+    use snk_grid::{color::Color, grid::Grid, point::Point, snake::Snake4};
+
+    use crate::exit_grid::ExitGrid;
+
+    #[test]
+    fn it_should_get_snake_path_to_outside() {
+        let grid = Grid::<_>::from(
+            r#"
 _########  _
 _#    .  . _
 _#      # _
 _########  _
 
 "#,
-    );
-    let pto = create_path_to_outside(&grid);
-    let snake = Snake4::from_points([
-        Point { x: 2, y: 2 },
-        Point { x: 3, y: 2 },
-        Point { x: 4, y: 2 },
-        Point { x: 5, y: 2 },
-    ]);
+        );
+        let pto = ExitGrid::create_from_grid_color(&grid);
+        let snake = Snake4::from_points([
+            Point { x: 2, y: 2 },
+            Point { x: 3, y: 2 },
+            Point { x: 4, y: 2 },
+            Point { x: 5, y: 2 },
+        ]);
 
-    let is_outside = |p| !pto.is_inside(p) || pto.get(p).is_outside();
+        let (path, cost) =
+            get_snake_path_to_outside(|p| pto.is_outside(p), |p| grid.get_color(p).into(), &snake);
 
-    let (path, cost) = get_snake_path_to_outside(is_outside, |p| grid.get_color(p).into(), &snake);
-
-    println!("{:?} {:?}", path, cost);
-    assert!(
-        cost < Cost::from(Color::Color2) * 2,
-        "should have taken the smallest path"
-    );
+        println!("{:?} {:?}", path, cost);
+        assert_eq!(
+            cost.get_color_count(Color::Color4),
+            1,
+            "should have taken the smallest path"
+        );
+    }
 }

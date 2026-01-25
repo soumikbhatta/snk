@@ -1,9 +1,9 @@
 // pub mod cave;
 // pub mod reach_outside;
-mod collect_cost;
+pub mod collect_cost;
 mod cost;
+pub mod exit_grid;
 mod fitness;
-mod path_to_outside_grid;
 pub mod snake_path;
 mod snake_path_to_outside;
 pub mod solver;

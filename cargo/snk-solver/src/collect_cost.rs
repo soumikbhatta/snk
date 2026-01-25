@@ -1,22 +1,12 @@
-use snk_grid::{
-    color::Color,
-    direction::{Direction, add_direction, iter_neighbour},
-    grid::{Grid, iter_rectangle_hull},
-    grid_samples::{SampleGrid, get_grid_sample},
-    point::Point,
-    snake::Snake4,
-};
-use std::collections::HashSet;
+use snk_grid::{color::Color, grid::Grid, point::Point, snake::Snake4};
 
-use crate::{
-    cost::Cost,
-    path_to_outside_grid::{ExitDirection, create_path_to_outside},
-};
+use crate::{cost::Cost, exit_grid::ExitGrid, snake_path_to_outside::get_snake_path_to_outside};
 
+#[derive(Debug)]
 pub struct Tunnel {
-    path: Vec<Point>,
-    in_cost: Cost,
-    out_cost: Cost,
+    pub path: Vec<Point>,
+    pub in_cost: Cost,
+    pub out_cost: Cost,
 }
 
 // pub fn get_collect_cost_(is_outside: F, get_cost: C) -> CollectionCost
@@ -26,84 +16,119 @@ pub struct Tunnel {
 // {
 // }
 
-pub fn get_collect_cost(grid: &Grid<Color>, exit_grid: &Grid<ExitDirection>, dot: Point) -> Tunnel {
-    let in_cost = exit_grid.get(dot).cost;
+pub fn get_best_tunnel_to_collect_point(
+    grid: &Grid<Color>,
+    exit_grid: &ExitGrid,
+    dot: Point,
+) -> Tunnel {
+    let in_cost = exit_grid.get_cost_to_outside(dot);
 
     let mut grid = grid.clone();
 
+    // first path, from the dot to the outside, it should be at least snake length long and ends in outside
     let mut path_out_1 = Vec::new();
 
     let mut p = dot;
 
     loop {
         path_out_1.push(p);
-
-        let (dir, outside) = if exit_grid.is_inside(p) {
-            let e = exit_grid.get(p);
+        if grid.is_inside(p) {
             grid.set(p, Color::Empty);
-            (e.exit_direction, e.is_outside())
-        } else {
-            println!("{:?}", get_outside_direction(&grid, p));
-            (get_outside_direction(&grid, p), true)
-        };
+        }
 
-        if path_out_1.len() >= 6 && outside {
+        if path_out_1.len() >= 6 && exit_grid.is_outside(p) {
             break;
         }
 
-        p += dir.into();
+        p += exit_grid.get_exit_direction(p).into();
     }
 
-    println!("path_out_1 {:?}", path_out_1);
-
-    let path = path_out_1
+    // path from the outside to the dot
+    let mut path = path_out_1
         .iter()
-        .take_while(|p| exit_grid.is_inside(**p) && !exit_grid.get(**p).is_outside())
+        .map(|p| *p)
+        .take_while(|p| !exit_grid.is_outside(*p))
         .collect::<Vec<_>>();
+    path.reverse();
 
-    println!("path {:?}", path);
-
-    let mut snake = Snake4::from_points(
+    // snake arriving from the outside to the dot
+    let snake = Snake4::from_points(
         path_out_1[0..4]
             .try_into()
             .expect("snake should be 4 points"),
     );
 
-    println!("{:?}", snake);
+    // /!\
+    // at this stage the exit grid is not in sync with the grid_color
+    // since we modified the grid_color
 
-    // TODO compute a probable initial snake
-
-    // TODO from that snake, seak the outside without self-colliding
+    // from that snake, seek the outside without self-colliding
+    let (path_out, out_cost) = get_snake_path_to_outside(
+        |p| exit_grid.is_outside(p),
+        |p| grid.get_color(p).into(),
+        &snake,
+    );
+    for dir in path_out {
+        let p = *path.last().unwrap();
+        path.push(p + dir.into());
+    }
+    path.pop();
 
     Tunnel {
-        path: path_out_1,
+        path,
         in_cost,
-        out_cost: Cost::zero(),
-    }
-}
-
-fn get_outside_direction<T: Copy>(grid: &Grid<T>, p: Point) -> Direction {
-    if p.x < 0 {
-        Direction::LEFT
-    } else if p.y < 0 {
-        Direction::UP
-    } else if (p.x as u8) >= grid.width {
-        Direction::RIGHT
-    } else if (p.y as u8) >= grid.height {
-        Direction::DOWN
-    } else {
-        assert!(false, "fail here");
-        Direction::DOWN
+        out_cost,
     }
 }
 
 #[test]
-#[ignore]
-fn it_should_compute_the_tunnel_for_small_cave() {
-    let grid = get_grid_sample(SampleGrid::OneSmallCave);
-    let pto = create_path_to_outside(&grid);
+fn it_should_compute_the_tunnel_for_enclaved_dot() {
+    let grid = Grid::<_>::from(
+        r#"
+_        _
+_  ###   _
+_  #.#   _
+_  ###   _
+_        _
 
-    get_collect_cost(&grid, &pto, Point { x: 4, y: 2 });
+"#,
+    );
+    assert_eq!(grid.get_color(Point { x: 4, y: 2 }), Color::Color1);
 
-    assert!(false)
+    let pto = ExitGrid::create_from_grid_color(&grid);
+
+    let tunnel = get_best_tunnel_to_collect_point(&grid, &pto, Point { x: 4, y: 2 });
+
+    assert_eq!(tunnel.in_cost.get_color_count(Color::Color4), 1);
+    assert_eq!(tunnel.out_cost.get_color_count(Color::Color4), 1);
+
+    assert_eq!(tunnel.in_cost.get_color_count(Color::Color1), 1);
+    assert_eq!(tunnel.out_cost.get_color_count(Color::Color1), 0);
+}
+
+#[test]
+fn it_should_compute_the_tunnel_for_enclaved_dot_in_large_cave() {
+    let grid = Grid::<_>::from(
+        r#"
+_          _
+_  #####   _
+_  #   #   _
+_  # . #   _
+_  #   #   _
+_  #####   _
+_        _
+
+"#,
+    );
+
+    assert_eq!(grid.get_color(Point { x: 5, y: 3 }), Color::Color1);
+
+    let pto = ExitGrid::create_from_grid_color(&grid);
+
+    let tunnel = get_best_tunnel_to_collect_point(&grid, &pto, Point { x: 5, y: 3 });
+    assert_eq!(tunnel.in_cost.get_color_count(Color::Color4), 1);
+    assert_eq!(tunnel.out_cost.get_color_count(Color::Color4), 0);
+
+    assert_eq!(tunnel.in_cost.get_color_count(Color::Color1), 1);
+    assert_eq!(tunnel.out_cost.get_color_count(Color::Color1), 0);
 }
