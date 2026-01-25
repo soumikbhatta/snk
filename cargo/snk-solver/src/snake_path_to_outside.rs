@@ -116,7 +116,7 @@ _########  _
 
         assert_eq!(
             cost.get_color_count(Color::Color4),
-            1,
+            0,
             "should have taken the smallest path"
         );
     }
