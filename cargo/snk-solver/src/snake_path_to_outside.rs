@@ -109,8 +109,11 @@ _########  _
             Point { x: 5, y: 2 },
         ]);
 
-        let (path, cost) =
-            get_snake_path_to_outside(|p| exit_grid.is_outside(p), |p| grid.get_color(p).into(), &snake);
+        let (path, cost) = get_snake_path_to_outside(
+            |p| exit_grid.is_outside(p),
+            |p| grid.get_color(p).into(),
+            &snake,
+        );
 
         println!("{:?} {:?}", path, cost);
 
@@ -135,7 +138,7 @@ _          _
 "#,
         );
 
-        assert_eq!(grid.get_color(Point { x: 5, y: 4 }),Color::Color4);
+        assert_eq!(grid.get_color(Point { x: 5, y: 4 }), Color::Color4);
 
         let exit_grid = ExitGrid::create_from_grid_color(&grid);
         let snake = Snake4::from_points([
@@ -147,8 +150,11 @@ _          _
 
         grid.set(Point { x: 5, y: 4 }, Color::Empty);
 
-        let (path, cost) =
-            get_snake_path_to_outside(|p| exit_grid.is_outside(p), |p| grid.get_color(p).into(), &snake);
+        let (path, cost) = get_snake_path_to_outside(
+            |p| exit_grid.is_outside(p),
+            |p| grid.get_color(p).into(),
+            &snake,
+        );
 
         println!("{:?} {:?}", path, cost);
         assert_eq!(
