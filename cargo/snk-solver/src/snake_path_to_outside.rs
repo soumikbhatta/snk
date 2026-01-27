@@ -86,7 +86,9 @@ where
 mod tests {
     use super::*;
 
-    use snk_grid::{color::Color, grid::Grid, point::Point, snake::Snake4};
+    use snk_grid::{
+        color::Color, grid::Grid, grid_samples::get_grid_sample, point::Point, snake::Snake4,
+    };
 
     use crate::exit_grid::ExitGrid;
 

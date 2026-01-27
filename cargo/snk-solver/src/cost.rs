@@ -50,6 +50,9 @@ impl Cost {
     pub fn is_free(&self) -> bool {
         self.0 < 256
     }
+    pub fn set_empty_to_zero(&self) -> Self {
+        Self((self.0 / 256) * 256)
+    }
 
     // return the count for the given color
     pub fn get_color_count(&self, color: Color) -> u64 {

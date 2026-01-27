@@ -1,4 +1,6 @@
-use snk_grid::{color::Color, grid::Grid, point::Point, snake::Snake4};
+use snk_grid::{
+    color::Color, grid::Grid, grid_samples::get_grid_sample, point::Point, snake::Snake4,
+};
 
 use crate::{cost::Cost, exit_grid::ExitGrid, snake_path_to_outside::get_snake_path_to_outside};
 
@@ -9,13 +11,8 @@ pub struct Tunnel {
     pub out_cost: Cost,
 }
 
-// pub fn get_collect_cost_(is_outside: F, get_cost: C) -> CollectionCost
-// where
-//     F: Fn(Point) -> bool,
-//     F: Fn(Point) -> u32,
-// {
-// }
-
+///
+/// it's not accurate and might report worse tunnel
 pub fn get_best_tunnel_to_collect_point(
     grid: &Grid<Color>,
     exit_grid: &ExitGrid,
@@ -149,9 +146,29 @@ _           _
 
     assert_eq!(grid.get_color(Point { x: 6, y: 3 }), Color::Color1);
 
-    let pto = ExitGrid::create_from_grid_color(&grid);
+    let exit_grid = ExitGrid::create_from_grid_color(&grid);
 
-    let tunnel = get_best_tunnel_to_collect_point(&grid, &pto, Point { x: 6, y: 3 });
+    let tunnel = get_best_tunnel_to_collect_point(&grid, &exit_grid, Point { x: 6, y: 3 });
+    assert_eq!(tunnel.in_cost.get_color_count(Color::Color4), 1);
+    assert_eq!(tunnel.out_cost.get_color_count(Color::Color4), 0);
+
+    assert_eq!(tunnel.in_cost.get_color_count(Color::Color1), 1);
+    assert_eq!(tunnel.out_cost.get_color_count(Color::Color1), 0);
+}
+
+#[test]
+fn it_should_get_snake_path_to_outside_3() {
+    let grid = get_grid_sample(snk_grid::grid_samples::SampleGrid::Caves);
+
+    assert_eq!(grid.get_color(Point { x: 29, y: 3 }), Color::Empty);
+    assert_eq!(grid.get_color(Point { x: 29, y: 4 }), Color::Color4);
+
+    let exit_grid = ExitGrid::create_from_grid_color(&grid);
+
+    let tunnel = get_best_tunnel_to_collect_point(&grid, &exit_grid, Point { x: 29, y: 3 });
+
+    println!("{:?}", tunnel);
+
     assert_eq!(tunnel.in_cost.get_color_count(Color::Color4), 1);
     assert_eq!(tunnel.out_cost.get_color_count(Color::Color4), 0);
 

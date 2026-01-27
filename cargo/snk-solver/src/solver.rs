@@ -1,7 +1,47 @@
-use snk_grid::{color::Color, direction::Direction, grid::Grid, snake::Snake4};
+use std::collections::HashMap;
 
-pub fn solve(grid: &Grid<Color>, snake: &Snake4) -> Vec<Direction> {
-    vec![]
+use snk_grid::{
+    color::Color,
+    direction::Direction,
+    grid::{Grid, iter_rectangle_fill},
+    point::Point,
+    snake::Snake4,
+};
+
+use crate::{
+    best_tunnel::{Tunnel, get_best_tunnel_to_collect_point},
+    cost::Cost,
+    exit_grid::ExitGrid,
+};
+
+pub const COLORS: [Color; 4] = [Color::Color1, Color::Color2, Color::Color3, Color::Color4];
+
+pub fn solve(color_grid: &Grid<Color>, snake: &Snake4) -> Vec<Direction> {
+    let exit_grid = ExitGrid::create_from_grid_color(color_grid);
+
+    let snake = snake.clone();
+    let path = Vec::new();
+
+    for color in COLORS.into_iter() {
+        let to_collect = iter_rectangle_fill(color_grid.width, color_grid.height)
+            .filter(|p| color_grid.get_color(*p) == color)
+            .map(|p| {
+                let tunnel = get_best_tunnel_to_collect_point(&color_grid, &exit_grid, p);
+                let score = tunnel.in_cost.set_empty_to_zero() * 2
+                    + tunnel.out_cost.set_empty_to_zero() * 3;
+                (p, tunnel, score, exit_grid.get_cost_to_outside(p))
+            });
+
+        let (free_to_collect, mut rest): (Vec<_>, Vec<_>) =
+            to_collect.partition(|(_, _, global_cost,_)| global_cost.is_free());
+
+        // todo!("collect free points");
+
+        rest.sort_by(|a, b| a.2.cmp(&b.2));
+
+    }
+
+    path
 }
 
 #[cfg(test)]

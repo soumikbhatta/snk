@@ -22,6 +22,9 @@ impl<T: Copy> Grid<T> {
         return (x as usize) * (self.height as usize) + (y as usize);
     }
 
+    pub fn copy(&mut self, other: &Self) -> () {
+        self.cells.clone_from_slice(&other.cells);
+    }
     pub fn fill(&mut self, value: T) -> () {
         self.cells.fill(value);
     }

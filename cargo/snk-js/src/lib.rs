@@ -54,7 +54,7 @@ pub fn get_best_tunnel_to_collect_point(grid: &IColorGrid, to: &IPoint) -> Vec<I
     let grid = snk_grid::grid::Grid::from(grid);
     let exit_grid = snk_solver::exit_grid::ExitGrid::create_from_grid_color(&grid);
     let res =
-        snk_solver::collect_cost::get_best_tunnel_to_collect_point(&grid, &exit_grid, to.into());
+        snk_solver::best_tunnel::get_best_tunnel_to_collect_point(&grid, &exit_grid, to.into());
 
     log::info!("{:?} {:?} {:?}", res.path, res.in_cost, res.out_cost);
 

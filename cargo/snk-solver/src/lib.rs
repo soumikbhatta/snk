@@ -1,6 +1,6 @@
 // pub mod cave;
 // pub mod reach_outside;
-pub mod collect_cost;
+pub mod best_tunnel;
 mod cost;
 pub mod exit_grid;
 mod fitness;
