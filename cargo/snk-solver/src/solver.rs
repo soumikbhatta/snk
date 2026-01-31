@@ -27,18 +27,21 @@ pub fn solve(color_grid: &Grid<Color>, snake: &Snake4) -> Vec<Direction> {
             .filter(|p| color_grid.get_color(*p) == color)
             .map(|p| {
                 let tunnel = get_best_tunnel_to_collect_point(&color_grid, &exit_grid, p);
-                let score = tunnel.in_cost.set_empty_to_zero() * 2
+                let score: Cost = tunnel.in_cost.set_empty_to_zero() * 2
                     + tunnel.out_cost.set_empty_to_zero() * 3;
-                (p, tunnel, score, exit_grid.get_cost_to_outside(p))
+                let cost_to_outside = exit_grid.get_cost_to_outside(p);
+                (p, tunnel, score, cost_to_outside)
             });
 
         let (free_to_collect, mut rest): (Vec<_>, Vec<_>) =
-            to_collect.partition(|(_, _, global_cost,_)| global_cost.is_free());
+            to_collect.partition(|(_, _, global_cost, _)| global_cost.is_free());
 
         // todo!("collect free points");
 
         rest.sort_by(|a, b| a.2.cmp(&b.2));
 
+        // take the first
+        // then we need to recompute the tunnel is the cost_to_outside changed
     }
 
     path

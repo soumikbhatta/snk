@@ -1,17 +1,21 @@
 use log::info;
 use snk_grid::{
+    color::Color,
     direction::{Direction, iter_directions},
+    grid::Grid,
+    grid_samples::get_grid_sample,
     point::{Point, get_distance},
     snake::{Snake, Snake4, snake_will_self_collide},
 };
-use std::collections::{BinaryHeap, HashSet};
+use std::collections::{BinaryHeap, HashMap, HashSet};
+
+use crate::cost::Cost;
 
 #[derive(Clone, Debug)]
 struct Node {
     pub snake: Snake4,
-    pub weight: u32,
-    pub distance: u32,
-    pub f: u32,
+    pub cost: Cost,
+    pub f: Cost,
     pub path: Vec<Direction>,
 }
 
@@ -23,7 +27,7 @@ impl PartialEq for Node {
 }
 impl Ord for Node {
     fn cmp(&self, other: &Self) -> std::cmp::Ordering {
-        self.f.cmp(&other.f)
+        other.f.cmp(&self.f)
     }
 }
 impl PartialOrd for Node {
@@ -32,153 +36,132 @@ impl PartialOrd for Node {
     }
 }
 
-pub fn get_snake_path<F>(
-    get_walk_cost: F,
+pub fn get_snake_path(
+    grid: &Grid<Color>,
     from: &Snake4,
     to: Point,
-    max_weight: u32,
-) -> Option<Vec<Direction>>
-where
-    F: Fn(Point) -> u32,
-{
+    max_cost: Cost,
+) -> Option<(Vec<Direction>, Cost)> {
     let mut open_list: BinaryHeap<Node> = BinaryHeap::new();
-    let mut close_list: HashSet<Snake4> = HashSet::new();
+    let mut close_list: HashMap<Snake4, Cost> = HashMap::new();
 
     open_list.push(Node {
-        distance: 0,
         snake: from.clone(),
-        weight: 0,
-        f: 0,
+        cost: Cost::zero(),
+        f: Cost::zero(),
         path: Vec::new(),
     });
-
-    open_list.push(Node {
-        distance: 0,
-        snake: from.clone(),
-        weight: 0,
-        f: 3,
-        path: Vec::new(),
-    });
-
-    open_list.push(Node {
-        distance: 0,
-        snake: from.clone(),
-        weight: 0,
-        f: 1,
-        path: Vec::new(),
-    });
-    open_list.push(Node {
-        distance: 0,
-        snake: from.clone(),
-        weight: 0,
-        f: 5,
-        path: Vec::new(),
-    });
-
-    log::info!(
-        "open_list {:?}",
-        open_list
-            .clone()
-            .into_iter()
-            .map(|n| n.f)
-            .collect::<Vec<_>>()
-    );
 
     let mut loop_count = 0;
 
     while let Some(node) = open_list.pop() {
         loop_count += 1;
 
-        log::info!(
-            "loop {} node {} {:?} open_list {:?}",
-            loop_count,
-            node.f,
-            node.snake.get_head(),
-            open_list
-                .clone()
-                .into_iter()
-                .map(|n| n.f)
-                .collect::<Vec<_>>()
-        );
+        println!("loop_count {} {:?}", loop_count, node);
+
+        if loop_count > 10_000 {
+            println!("loop_count exceeded");
+            return None;
+        }
+
+        {
+            let head = node.snake.get_head();
+
+            if to == head {
+                let mut path = node.path;
+
+                path.reverse();
+                return Some((path, node.cost));
+            }
+        }
 
         for dir in iter_directions() {
             if snake_will_self_collide(&node.snake, dir) {
                 continue;
             }
             let snake = node.snake.clone_and_move(dir);
+            let head = snake.get_head();
 
-            if close_list.contains(&snake) {
-                // need to update open_list
+            if !grid.is_inside_margin(head, 2) {
                 continue;
             }
 
-            let head = snake.get_head();
+            let cost = node.cost + grid.get_color(head).into();
+            let distance = get_distance(head, to);
 
-            if to == head {
-                // unroll and return
-                let mut path = node.path.clone();
-                path.push(dir);
-
-                log::info!(" {:?} : {:?}", to, head);
-                log::info!("found loop {} length: {}", loop_count, path.len());
-
-                path.reverse();
-                return Some(path);
+            let f = cost + Cost::from(Color::Empty) * (distance as u64);
+            if f > max_cost {
+                continue;
             }
 
-            let weight = node.weight + get_walk_cost(head);
-            let distance = get_distance(head, to) as u32;
-            log::info!(" {:?} {:?}", head, distance);
+            if let Some(last_cost) = close_list.get(&snake)
+                && *last_cost <= cost
+            {
+                continue;
+            }
 
-            let f = weight + distance;
-            // if f > max_weight {
-            //     continue;
-            // }
+            println!("head {:?}", head);
+
+            close_list.insert(snake.clone(), node.cost);
 
             let mut path = node.path.clone();
             path.push(dir);
             open_list.push(Node {
                 snake,
-                weight,
-                distance,
+                cost,
                 f,
                 path,
             });
         }
-
-        close_list.insert(node.snake);
-
-        log::info!(
-            "open_list {:?}",
-            open_list
-                .clone()
-                .into_iter()
-                .map(|n| n.f)
-                .collect::<Vec<_>>()
-        );
     }
 
     None
 }
 
 #[test]
-#[ignore]
-fn it_should_found_simple_path() {
+fn it_should_find_simple_path() {
     let snake = Snake4::from_points([
         Point { x: 0, y: 0 },
         Point { x: 1, y: 0 },
         Point { x: 2, y: 0 },
         Point { x: 3, y: 0 },
     ]);
-    let res = get_snake_path(|_| 1, &snake, Point { x: 0, y: 3 }, 9999);
+    let grid = Grid::<_>::from(
+        r#"
+_    _
+_    _
+_    _
+_    _
+"#,
+    );
+    let (path, cost) = get_snake_path(&grid, &snake, Point { x: 0, y: 3 }, Cost::max()).unwrap();
 
     assert_eq!(
-        res,
-        Some(vec![
+        path,
+        vec![
             //
-            Direction::UP,
-            Direction::UP,
-            Direction::UP,
-        ])
+            Direction::DOWN,
+            Direction::DOWN,
+            Direction::DOWN,
+        ]
     )
+}
+
+#[test]
+fn it_should_find_path_out_of_labyrinth() {
+    let snake = Snake4::from_points([
+        Point { x: 0, y: -1 },
+        Point { x: 1, y: -1 },
+        Point { x: 2, y: -1 },
+        Point { x: 3, y: -1 },
+    ]);
+    let grid = get_grid_sample(snk_grid::grid_samples::SampleGrid::Labyrinth);
+
+    assert_eq!(grid.get_color(Point { x: 1, y: 5 }), Color::Color1);
+
+    let (path, cost) = get_snake_path(&grid, &snake, Point { x: 1, y: 5 }, Cost::max()).unwrap();
+
+    println!("{:?} {:?}", path, cost);
+
+    assert!(cost < Cost::from(Color::Color1) * 2)
 }

@@ -5,6 +5,7 @@ use snk_grid::{
     point::Point,
     snake::{Snake, Snake4},
 };
+use snk_solver::cost::Cost;
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
@@ -29,20 +30,9 @@ pub fn get_snake_path(grid: IColorGrid, snake: Vec<IPoint>, to: IPoint) -> Optio
             .try_into()
             .expect("snake should be 4 points"),
     );
-    let res = snk_solver::snake_path::get_snake_path(
-        |p| match grid.get_color(p) {
-            Color::Empty => 1,
-            Color::Color1 => 10,
-            Color::Color2 => 100,
-            Color::Color3 => 200,
-            Color::Color4 => 300,
-        },
-        &snake,
-        to.into(),
-        10,
-    );
+    let res = snk_solver::snake_path::get_snake_path(&grid, &snake, to.into(), Cost::max());
 
-    res.map(|d| {
+    res.map(|(d, _)| {
         d.into_iter()
             .map(|dir| dir.to_point())
             .map(IPoint::from)
