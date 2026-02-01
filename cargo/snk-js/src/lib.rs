@@ -79,22 +79,30 @@ pub fn get_snake_path_to_outside(grid: &IColorGrid, snake: Vec<IPoint>) -> Vec<I
         .collect()
 }
 
-// #[wasm_bindgen]
-// pub fn solve(grid: IColorGrid) -> js_sys::Uint8Array {
-//     todo!("todo");
-//     let res = snk_solver::solver::solve(snk_grid::grid::Grid::from(grid));
-//     js_sys::Uint8Array::from(
-//         &(res
-//             .iter()
-//             .map(|u| match *u {
-//                 Direction::UP => 1,
-//                 Direction::DOWN => 2,
-//                 Direction::LEFT => 3,
-//                 Direction::RIGHT => 4,
-//             })
-//             .collect::<Vec<u8>>())[..],
-//     )
-// }
+#[wasm_bindgen]
+pub fn solve(grid: &IColorGrid, snake: Vec<IPoint>) -> Vec<IPoint> {
+    let grid = snk_grid::grid::Grid::from(grid);
+    let snake = Snake4::from_points(
+        snake
+            .into_iter()
+            .map(|p| Point::from(p))
+            .collect::<Vec<_>>()
+            .try_into()
+            .expect("snake should be 4 points"),
+    );
+    let res = snk_solver::solver::solve(&grid, &snake);
+
+    log::info!("{:?}", res);
+
+    let mut p = snake.get_head();
+    res.into_iter()
+        .map(|dir| {
+            p = p + dir.to_point();
+            p
+        })
+        .map(IPoint::from)
+        .collect()
+}
 
 #[wasm_bindgen]
 pub fn get_grid_sample(sample_name: String) -> IColorGrid {
@@ -102,6 +110,8 @@ pub fn get_grid_sample(sample_name: String) -> IColorGrid {
         "empty" => SampleGrid::Empty,
         "labyrinth" => SampleGrid::Labyrinth,
         "caves" => SampleGrid::Caves,
+        "cave" => SampleGrid::OneCave,
+        "cave2" => SampleGrid::OneSmallCave,
         "realistic" => SampleGrid::Realistic,
         "one-dot" => SampleGrid::OneDot,
         "solid-block" => SampleGrid::SolidBlock,

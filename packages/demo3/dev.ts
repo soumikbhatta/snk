@@ -3,11 +3,13 @@ import * as childProcess from "child_process";
 import * as fs from "fs";
 import * as path from "path";
 import snake_exit_page from "./snake_exit/index.html";
+import solver_page from "./solver/index.html";
 import tunnel_page from "./tunnel/index.html";
 
 const server = serve({
 	routes: {
-		"/": tunnel_page,
+		"/": solver_page,
+		"/solver": solver_page,
 		"/tunnel": tunnel_page,
 		"/snake_exit": snake_exit_page,
 	},

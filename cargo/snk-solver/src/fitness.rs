@@ -26,9 +26,11 @@ pub fn get_solution_fitness(
         step(&mut grid, &mut snake, &mut stack, direction);
     }
 
+    println!("{:?}", stack);
+
     let remaining_color_count = iter_rectangle_fill(grid.width as i8, grid.height as i8)
         .fold(0, |sum, p| {
-            sum + if grid.get_color(p).is_empty() { 1 } else { 0 }
+            sum + if grid.get_color(p).is_empty() { 0 } else { 1 }
         });
     let stack_fitness = get_stack_fitness(&stack);
     let solution_fitness = remaining_color_count * 100_000 + stack_fitness * 1000 + solution_length;

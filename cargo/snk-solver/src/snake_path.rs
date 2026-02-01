@@ -1,4 +1,3 @@
-use log::info;
 use snk_grid::{
     color::Color,
     direction::{Direction, iter_directions},
@@ -7,7 +6,7 @@ use snk_grid::{
     point::{Point, get_distance},
     snake::{Snake, Snake4, snake_will_self_collide},
 };
-use std::collections::{BinaryHeap, HashMap, HashSet};
+use std::collections::{BinaryHeap, HashMap};
 
 use crate::cost::Cost;
 
@@ -36,6 +35,8 @@ impl PartialOrd for Node {
     }
 }
 
+// TODO: when the snake have moved at least it's length, it's useless to come back to a cell of it's body
+// -> we could likely get away with moving cell by cell rather than the whole snake
 pub fn get_snake_path(
     grid: &Grid<Color>,
     from: &Snake4,
@@ -56,8 +57,6 @@ pub fn get_snake_path(
 
     while let Some(node) = open_list.pop() {
         loop_count += 1;
-
-        println!("loop_count {} {:?}", loop_count, node);
 
         if loop_count > 10_000 {
             println!("loop_count exceeded");
@@ -99,8 +98,6 @@ pub fn get_snake_path(
             {
                 continue;
             }
-
-            println!("head {:?}", head);
 
             close_list.insert(snake.clone(), node.cost);
 
