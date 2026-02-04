@@ -33,10 +33,15 @@ console.log(`Listening on ${server.url}`);
 		);
 		const cwd = path.resolve(__dirname, "../../cargo/snk-js");
 		const gitIgnore = path.resolve(__dirname, "../snk-js/.gitignore");
-		childProcess.execSync(
-			`${wasmPackFile} build --dev --target web --out-dir ../../packages/snk-js && rm ${gitIgnore}`,
-			{ cwd },
-		);
+
+		try {
+			childProcess.execSync(
+				`${wasmPackFile} build --dev --target web --out-dir ../../packages/snk-js && rm ${gitIgnore}`,
+				{ cwd },
+			);
+		} catch (err) {
+			console.error(err);
+		}
 	};
 
 	let timeout: number | Timer | undefined;

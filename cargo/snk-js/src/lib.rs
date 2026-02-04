@@ -94,12 +94,8 @@ pub fn solve(grid: &IColorGrid, snake: Vec<IPoint>) -> Vec<IPoint> {
 
     log::info!("{:?}", res);
 
-    let mut p = snake.get_head();
     res.into_iter()
-        .map(|dir| {
-            p = p + dir.to_point();
-            p
-        })
+        .map(|dir| dir.to_point())
         .map(IPoint::from)
         .collect()
 }

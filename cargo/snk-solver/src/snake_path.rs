@@ -58,23 +58,26 @@ pub fn get_snake_path(
     while let Some(node) = open_list.pop() {
         loop_count += 1;
 
-        if loop_count > 10_000 {
-            println!("loop_count exceeded");
-            return None;
+        if loop_count > 20_000 {
+            panic!("loop_count exceeded")
         }
 
         {
             let head = node.snake.get_head();
 
             if to == head {
-                let mut path = node.path;
-
-                path.reverse();
-                return Some((path, node.cost));
+                return Some((node.path, node.cost));
             }
         }
 
         for dir in iter_directions() {
+            // log::info!(
+            //     " -  snake {:?} dir {:?}, {:?}",
+            //     node.snake,
+            //     dir,
+            //     snake_will_self_collide(&node.snake, dir)
+            // );
+
             if snake_will_self_collide(&node.snake, dir) {
                 continue;
             }

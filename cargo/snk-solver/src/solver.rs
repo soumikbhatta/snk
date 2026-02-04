@@ -100,7 +100,8 @@ pub fn solve(color_grid: &Grid<Color>, snake: &Snake4) -> Vec<Direction> {
                     &color_grid,
                     &snake,
                     point,
-                    tunnel.in_cost + Color::Color1.into(),
+                    Cost::max(),
+                    // tunnel.in_cost + Cost::from(Color::Color1) ,
                 )
                 .unwrap();
 
