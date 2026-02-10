@@ -1,47 +1,27 @@
 use snk_grid::{
     color::Color,
-    direction::{Direction, iter_directions, sub_direction},
+    direction::{Direction, iter_directions},
     grid::Grid,
     grid_samples::get_grid_sample,
     point::{Point, get_distance},
     snake::{Snake, Snake4, snake_will_self_collide},
 };
-use std::hash::{Hash, Hasher};
-use std::{
-    collections::{BinaryHeap, HashMap, HashSet},
-    rc::Rc,
-};
+use std::collections::{BinaryHeap, HashMap};
 
 use crate::cost::Cost;
 
 #[derive(Clone, Debug)]
 struct Node {
-    pub point: Point,
+    pub snake: Snake4,
     pub cost: Cost,
-    pub n: u8,
     pub f: Cost,
-    pub parent: Option<Rc<Node>>,
+    pub path: Vec<Direction>,
 }
 
-impl Hash for Node {
-    fn hash<H: Hasher>(&self, state: &mut H) {
-        self.point.hash(state);
-        if let Some(ref parent) = self.parent {
-            parent.point.hash(state);
-        }
-    }
-}
 impl Eq for Node {}
 impl PartialEq for Node {
     fn eq(&self, other: &Self) -> bool {
-        self.point.eq(&other.point)
-            && match self.parent {
-                Some(ref parent) => match other.parent {
-                    Some(ref other_parent) => parent.point.eq(&other_parent.point),
-                    None => false,
-                },
-                None => other.parent.is_none(),
-            }
+        self.path == other.path
     }
 }
 impl Ord for Node {
@@ -55,6 +35,8 @@ impl PartialOrd for Node {
     }
 }
 
+// TODO: when the snake have moved at least it's length, it's useless to come back to a cell of it's body
+// -> we could likely get away with moving cell by cell rather than the whole snake
 pub fn get_snake_path(
     grid: &Grid<Color>,
     from: &Snake4,
@@ -62,18 +44,13 @@ pub fn get_snake_path(
     max_cost: Cost,
 ) -> Option<(Vec<Direction>, Cost)> {
     let mut open_list: BinaryHeap<Node> = BinaryHeap::new();
-    let mut close_list: HashSet<(Point, Point)> = HashSet::new();
-
-    let forbidden_cells: Vec<_> = from.iter_head_to_tail().collect();
-    let n_max = forbidden_cells.len() as u8;
+    let mut close_list: HashMap<Snake4, Cost> = HashMap::new();
 
     open_list.push(Node {
-        point: from.get_head(),
+        snake: from.clone(),
         cost: Cost::zero(),
         f: Cost::zero(),
-        n: 0,
-        // parent: first_parent.map(|p| Rc::new(p)),
-        parent: None,
+        path: Vec::new(),
     });
 
     let mut loop_count = 0;
@@ -82,69 +59,58 @@ pub fn get_snake_path(
         loop_count += 1;
 
         if loop_count > 20_000 {
-            panic!("loop_count out of control")
+            panic!("loop_count exceeded")
         }
 
-        let node_cost = node.cost;
+        {
+            let head = node.snake.get_head();
 
-        if to == node.point {
-            println!("{:?}", loop_count);
-
-            let mut path = Vec::new();
-
-            let mut u = Rc::new(node);
-            while let Some(ref parent) = u.parent {
-                let dir = sub_direction(parent.point, u.point);
-                path.push(dir);
-                u = Rc::clone(parent);
+            if to == head {
+                return Some((node.path, node.cost));
             }
-            return Some((path, node_cost));
         }
-
-        let n = node.n + 1;
-
-        let node_point = node.point;
-        let b = Rc::new(node);
 
         for dir in iter_directions() {
-            let next_point = node_point + dir.to_point();
+            // log::info!(
+            //     " -  snake {:?} dir {:?}, {:?}",
+            //     node.snake,
+            //     dir,
+            //     snake_will_self_collide(&node.snake, dir)
+            // );
 
-            if close_list.contains(&(next_point, node_point)) {
+            if snake_will_self_collide(&node.snake, dir) {
                 continue;
-            } else {
-                close_list.insert((next_point, node_point));
             }
+            let snake = node.snake.clone_and_move(dir);
+            let head = snake.get_head();
 
-            if !grid.is_inside_margin(next_point, 2) {
+            if !grid.is_inside_margin(head, 2) {
                 continue;
             }
 
-            if (n as usize) + 1 < (n_max as usize) {
-                let collide = forbidden_cells
-                    .iter()
-                    .take((n_max as usize) - (n as usize) + 1)
-                    .any(|p| *p == next_point);
+            let cost = node.cost + grid.get_color(head).into();
+            let distance = get_distance(head, to);
 
-                if collide {
-                    continue;
-                }
-            }
-
-            let cost = node_cost + grid.get_color(next_point).into();
-            let distance = get_distance(next_point, to);
-
-            // best case: only empty cells from here
             let f = cost + Cost::from(Color::Empty) * (distance as u64);
             if f > max_cost {
                 continue;
             }
 
+            if let Some(last_cost) = close_list.get(&snake)
+                && *last_cost <= cost
+            {
+                continue;
+            }
+
+            close_list.insert(snake.clone(), node.cost);
+
+            let mut path = node.path.clone();
+            path.push(dir);
             open_list.push(Node {
-                point: next_point,
+                snake,
                 cost,
-                n,
                 f,
-                parent: Some(Rc::clone(&b)),
+                path,
             });
         }
     }
@@ -210,9 +176,9 @@ fn it_should_not_self_collide() {
     ]);
     let grid = Grid::<_>::from(
         r#"
-########
-       .
-########
+#########
+       .#
+#########
 "#,
     );
 

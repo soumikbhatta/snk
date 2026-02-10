@@ -21,7 +21,8 @@ init_log();
 
 const igrid = get_grid_sample(
 	// "caves",
-	"labyrinth",
+	// "labyrinth",
+	"realistic",
 	// "cave",
 	// "one-dot",
 );

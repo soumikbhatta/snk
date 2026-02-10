@@ -69,6 +69,8 @@ pub fn solve(color_grid: &Grid<Color>, snake: &Snake4) -> Vec<Direction> {
             if let Some((point, _)) = pop_min(&mut free_to_collect, |(point, _)| {
                 get_distance(*point, head)
             }) {
+                log::info!("{:?} {:?}", color_grid, point);
+
                 // path find from the snake to the point
                 // (it should be able to do so without eating walls)
                 let (sub_path, _) =

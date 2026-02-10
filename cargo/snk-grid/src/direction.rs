@@ -76,6 +76,18 @@ pub fn iter_neighbour(p: Point) -> impl Iterator<Item = Point> {
     iter_directions().map(move |dir| add_direction(p, dir))
 }
 
+pub fn sub_direction(a: Point, b: Point) -> Direction {
+    let x = a.x - b.x;
+    let y = a.y - b.y;
+    match (x, y) {
+        (0, 1) => Direction::UP,
+        (0, -1) => Direction::DOWN,
+        (-1, 0) => Direction::LEFT,
+        (1, 0) => Direction::RIGHT,
+        _ => panic!("Invalid direction"),
+    }
+}
+
 #[test]
 fn it_should_iter_direction() {
     let directions: HashSet<_> = iter_directions().collect();
